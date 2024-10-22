@@ -108,7 +108,7 @@ Description text (optional)
 
 **Step 5: Run the Exploit**
 - Finally, run the vulnerable program with the crafted payload. The shellcode will be executed, and the /etc/hosts file will be modified.<br>
-`./vuln.out $(cat payload)`
+`sudo ./vuln.out $(cat payload)`
 
 output screenshot (optional)
 
