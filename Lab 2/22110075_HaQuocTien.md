@@ -9,7 +9,7 @@ Implement public-key based authentication step-by-step with openssl according th
 - **Bob**: will be the client.
 - **Alice**: will be the server.
 
-![alt text](/imgs/1.png)
+![img](./imgs/1.png)
 
 - **Step 1**: We needto create a **private** and **public** key for the client.
 Get in to the client (Bob):
@@ -25,13 +25,13 @@ openssl genpkey -algorithm RSA -out client_private_key.pem -pkeyopt rsa_keygen_b
 - **-out client_private_key.pem**: the output file that contain the private key for the client. **Note**: PEM (Privacy-Enhanced Mail).
 - **-pkeyopt rsa_keygen_bits:2048**: an option for the key length. In this case, the private key length is 2048 bits.
 
-![alt text](/imgs/2.png)
+![img](./imgs/2.png)
 
 Watch the private key using:
 ```sh
 cat client_private_key.pem
 ```
-![alt text](/imgs/3.png)
+![img](./imgs/3.png)
 
 See the infomation about the key:
 ```sh
@@ -50,7 +50,7 @@ openssl rsa -in client_private_key.pem -pubout -out client_public_key.pem
 - **-pubout**: This option is used to export the public key from the private key.
 - **-out client_public_key.pem**: file output contain the public key.
 
-![alt text](/imgs/4.png)
+![img](./imgs/4.png)
 
 **Note**: use the commands like private key to watch the public key.
 
@@ -69,7 +69,7 @@ docker cp /tmp/client_public_key.pem alice-10.9.0.5:/
 - **/tmp/client_public_key.pem**: File path on the host machine.
 - **alice-10.9.0.5:/**: where to save the file on Alice container.
 
-![alt text](/imgs/5.png)
+![img](./imgs/5.png)
 
 - **Step 3**: send the challenge message from server(Alice).
 ```sh
@@ -84,7 +84,7 @@ echo "Alice_challenge_message" > challenge.txt
 ```sh
 openssl rsautl -encrypt -inkey client_public_key.pem -pubin -in challenge.txt -out encrypted_challenge.bin
 ```
-![alt text](/imgs/6.png)
+![img](./imgs/6.png)
 
 **Copy files from the container server to the host computer**
 ```sh
@@ -94,23 +94,23 @@ docker cp alice-10.9.0.5:/encrypted_challenge.bin /tmp/encrypted_challenge.bin
 ```sh
 docker cp /tmp/encrypted_challenge.bin bob-10.9.0.6:/
 ```
-![alt text](/imgs/7.png)
+![img](./imgs/7.png)
 
 - **Step 4**: The client decodes the challenge message.
 ```sh
 openssl rsautl -decrypt -inkey /client_private_key.pem -in /encrypted_challenge.bin -out /decrypted_challenge.txt
 ```
-![alt text](/imgs/8.png)
+![img](./imgs/8.png)
 
 Before and after decrupted
 
-![alt text](/imgs/9.png)
+![img](./imgs/9.png)
 
 - **Step 5**: Bob signs the challenge message with private key
 ```sh
 openssl dgst -sha256 -sign /client_private_key.pem -out /challenge_signature.bin /decrypted_challenge.txt
 ```
-![alt text](/imgs/10.png)
+![img](./imgs/10.png)
 
 Transfer signature to Alice
 
@@ -126,7 +126,7 @@ docker cp /tmp/challenge_signature.bin alice-10.9.0.5:/challenge_signature.bin
 ```sh
 openssl dgst -sha256 -verify /client_public_key.pem -signature /challenge_signature.bin /challenge.txt
 ```
-![alt text](/imgs/11.png)
+![img](./imgs/11.png)
 
 # Task 2: Encrypting large message 
 Create a text file at least 56 bytes.
@@ -141,7 +141,7 @@ Watch the file size.
 ```sh
 wc -c /large_message_Bob.txt
 ```
-![alt text](/imgs/12.png)
+![img](./imgs/12.png)
 - **Step 2**: Create Key and IV
 256 bits(32 bytes) key
 ```sh
@@ -167,7 +167,7 @@ Encryption using AES-256 in OFB mode:
 ```sh
 openssl enc -aes-256-ofb -in /large_message_Bob.txt -out /encrypted_ofb.bin -K $(cat /key.txt) -iv $(cat /iv.txt)
 ```
-![alt text](/imgs/13.png)
+![img](./imgs/13.png)
 
 - **Step 4**: Transfer encrypted files from Bob to Alice
 On the host machine:
@@ -185,7 +185,7 @@ docker cp /tmp/encrypted_ofb.bin alice-10.9.0.5:/encrypted_ofb.bin
 docker cp /tmp/key.txt alice-10.9.0.5:/
 docker cp /tmp/iv.txt alice-10.9.0.5:/
 ```
-![alt text](/imgs/14.png)
+![img](./imgs/14.png)
 
 - **Step 5**: Analyze the error by modifying the 8th byte
 Download xxd
@@ -200,14 +200,14 @@ xxd /encrypted_cfb.bin > /encrypted_cfb.hex
 xxd /encrypted_ofb.bin > /encrypted_ofb.hex
 ```
 Check the hex file
-![alt text](/imgs/15.png)
+![img](./imgs/15.png)
 
 **Open the hex file and edit the 8th byte**
 ```sh
 nano /encrypted_cfb.hex
 nano /encrypted_ofb.hex
 ```
-![alt text](/imgs/16.png)
+![img](./imgs/16.png)
 - **Identify the 8th bytes**: Here, the 8th byte is 0x11 (the 8th value in the second pair of digits: 11fa). I will change it to 0x99
 - In nano, press Ctrl + O to save, then Enter, and Ctrl + X to exit.
 
@@ -223,7 +223,7 @@ xxd -r /encrypted_ofb.hex /modified_encrypted_ofb.bin
 openssl enc -d -aes-256-cfb -in /modified_encrypted_cfb.bin -out /decrypted_cfb.txt -K $(cat /key.txt) -iv $(cat /iv.txt)
 openssl enc -d -aes-256-cfb -in /modified_encrypted_ofb.bin -out /decrypted_ofb.txt -K $(cat /key.txt) -iv $(cat /iv.txt)
 ```
-![alt text](/imgs/17.png)
+![img](./imgs/17.png)
 
 - CFB Mode:
 An error in the 8th byte will affect many subsequent bytes (depending on the block length) due to the dependence of the CFB mode on the previous ciphertext.
